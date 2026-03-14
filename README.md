@@ -13,7 +13,7 @@ EDA, preprocessing, and baseline model (Logistic Regression + Random Forest).
 developers. Final model-ready matrix: 45 features.
 
 Source: https://survey.stackoverflow.co/2025  
-Kaggle: https://www.kaggle.com/datasets/your-username/stack-overflow-developer-survey-2025
+Kaggle: https://www.kaggle.com/datasets/aliaslam25/stack-overflow-developer-survey-2025/
 
 ## Results
 *(To be updated after modeling)*
