@@ -6,13 +6,19 @@ Predicting whether professional developers agree that AI tools and agents have i
 
 ## 📌 Project Overview
 
-With the rapid emergence of AI developer agents and assistants, this project investigates developer perceptions and productivity impacts. Using machine learning models, we formulate a classification pipeline to predict developer productivity sentiment (`Agree`/`Disagree` that AI tools increase productivity) based on their workflow, tooling, experience, compensation, and organization profile.
+With the rapid emergence of AI developer agents and assistants, this project investigates developer perceptions and productivity impacts. Using machine learning models, we formulate a classification pipeline to predict developer productivity sentiment (**Agree** vs. **Neutral / Disagree** that AI tools increase productivity) based on their workflow, tooling, experience, compensation, and organization profile.
+
+* **Target Variable**: Binary classification derived from `AIAgentImpact` Likert responses:
+  * `Class 1 (Agree)`: *Strongly agree* or *Somewhat agree* (6,515 developers, ~68.5%)
+  * `Class 0 (Non-Agree)`: *Neutral*, *Somewhat disagree*, or *Strongly disagree* (2,998 developers, ~31.5%)
+* **Final Cohort**: 9,513 verified professional developers with non-zero experience.
+* **Feature Set**: 52 engineered features spanning demographic, technical stack, organizational, and AI tool usage variables.
 
 ---
 
 ## 📊 Dataset & Access
 
-Due to GitHub's file size limit (100 MB), the raw survey data (~140.9 MB) is not tracked in this repository.
+Due to GitHub's file size limit (100 MB), the raw survey data (~140.9 MB) is not tracked directly in this repository.
 
 * **Raw Survey Dataset (`survey_results_public.csv`)**: Available on Kaggle:  
   👉 **[Kaggle: Stack Overflow Developer Survey 2025 Dataset](https://www.kaggle.com/datasets/aliaslam25/stack-overflow-developer-survey-2025/)**
@@ -68,20 +74,28 @@ stackoverflow-developer-survey-2025/
 
 ## 🔬 Project Phases Summary
 
+* **Phase 1 — Proposal & Scoping**:
+  Defined the research question, identified the 2025 Stack Overflow Developer Survey as the primary dataset, and established evaluation criteria.
 * **Phase 2 — Visualization & Preprocessing**:
-  Filtered raw responses (49,123 respondents) to an active cohort of professional developers utilizing AI developer tools. Addressed missingness, target construction, and preliminary visualizations.
+  Filtered raw survey responses (49,123 total responses) to the 12,771 respondents evaluating AI tools, then refined to an active cohort of 9,513 professional developers. Addressed missingness, target construction, and initial exploratory data analysis.
 * **Phase 3 — Feature Engineering**:
-  Engineered interaction terms, multi-select feature aggregations, compensation adjustments, and categorical encoding, producing a final model-ready dataset of 45 features across 9,502 developers.
-* **Phase 4 — Methodology & Model Evaluation**:
-  Benchmarked baseline and non-linear classifiers using 5-fold cross-validation evaluated on ROC-AUC, Macro-F1, Precision, and Recall.
-* **Phase 5 — Advanced Methodology & Deep Dive**:
-  Explored ensemble techniques, hyperparameter optimization, and in-depth performance analysis documented in the Phase 5 research paper.
+  Engineered task aggregations, tool complexity metrics, salary log-transformations, and categorical encodings, producing the model-ready dataset of 52 features across 9,513 developers (`phase3/phase3_final.csv`).
+* **Phase 4 — Methodology & Baseline Benchmarking**:
+  Evaluated standard classification algorithms using 5-fold Stratified Cross-Validation across ROC-AUC, Macro-F1, Precision, and Recall.
+* **Phase 5 — Methodology Improvement & Advanced Optimization**:
+  Implemented three targeted improvements:
+  1. *Bayesian Hyperparameter Optimization* (Optuna on XGBoost)
+  2. *Decision Threshold Tuning* (optimizing macro-F1 on out-of-fold predictions)
+  3. *Stacking Ensemble* (XGBoost + Random Forest + Logistic Regression with logistic meta-learner)
 * **Phase 6 — Final Research Paper**:
-  Comprehensive research paper synthesis covering literature review, methodology, comparative analysis, error analysis, and implications for AI adoption in software development.
+  Complete academic paper documenting the literature review, methodology, empirical findings, feature importances (SHAP/LIME), and implications for developer tooling adoption.
 
 ---
 
-## 📈 Model Benchmark Results (Phase 4)
+## 📈 Model Performance & Results
+
+### 1. Baseline Benchmark (Phase 4)
+*5-fold Stratified Cross-Validation on default configurations:*
 
 | Model | ROC-AUC | F1-macro | Accuracy | Precision-macro | Recall-macro |
 |---|---|---|---|---|---|
@@ -89,8 +103,18 @@ stackoverflow-developer-survey-2025/
 | **Random Forest** | 0.8457 | 0.7465 | 0.7997 | 0.7836 | 0.7303 |
 | **SVM (RBF) [30% sample]** | 0.8402 | **0.7494** | **0.8034** | **0.7910** | 0.7321 |
 | **XGBoost** | 0.8387 | 0.7443 | 0.7754 | 0.7411 | 0.7489 |
-| **KNN ($k=11$)** | 0.8113 | 0.7199 | 0.7782 | 0.7521 | 0.7062 |
-| **KNN ($k=5$)** | 0.7779 | 0.7034 | 0.7595 | 0.7227 | 0.6937 |
+| **KNN (k=11)** | 0.8113 | 0.7199 | 0.7782 | 0.7521 | 0.7062 |
+| **KNN (k=5)** | 0.7779 | 0.7034 | 0.7595 | 0.7227 | 0.6937 |
+
+### 2. Methodological Improvements (Phase 5)
+*Targeted optimization addressing hyperparameter search, class imbalance thresholding, and model diversity:*
+
+| Model / Strategy | ROC-AUC | F1-macro | Accuracy | Configuration / Notes |
+|---|---|---|---|---|
+| **Phase 4 Baseline (XGBoost)** | 0.8387 | 0.7443 | 0.7754 | Default hyperparameters, threshold = 0.50 |
+| **Phase 5 Tuned XGBoost** | 0.8535 | 0.7528 | 0.8002 | 5-fold CV mean, Optuna tuned (200 estimators, max depth 3) |
+| **Phase 5 Tuned XGBoost + Optimal Threshold** | 0.8534 | **0.7624** | 0.7938 | Out-of-fold threshold optimization (optimal threshold = 0.605) |
+| **Phase 5 Stacking Ensemble** | **0.8538** | 0.7567 | **0.8036** | 5-fold CV mean (XGB + RF + LR meta-classifier) |
 
 ---
 
@@ -114,4 +138,6 @@ pip install -r requirements.txt
 ```
 
 ### 3. Obtain Data
-To rerun preprocessing from the raw dataset, download `survey_results_public.csv` from [Kaggle](https://www.kaggle.com/datasets/aliaslam25/stack-overflow-developer-survey-2025/) and place it in the project root. The preprocessed files (`phase2/phase2_preprocessed.csv` and `phase3/phase3_final.csv`) are already included in the repository so you can jump straight into modeling!
+The processed feature matrices ([`phase2/phase2_preprocessed.csv`](phase2/phase2_preprocessed.csv) and [`phase3/phase3_final.csv`](phase3/phase3_final.csv)) are already included in the repository, allowing you to run the modeling notebooks immediately.
+
+To rerun preprocessing from the raw dataset, download `survey_results_public.csv` from [Kaggle](https://www.kaggle.com/datasets/aliaslam25/stack-overflow-developer-survey-2025/) and place it in the project root.
