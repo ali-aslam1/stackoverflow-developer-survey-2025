@@ -1,0 +1,30 @@
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python cache & compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.ipynb_checkpoints/
+
+# IDE & Editor settings
+.cursor/
+.vscode/
+.idea/
+
+# Large raw datasets (>100MB, cannot be committed to GitHub)
+# Download the raw dataset from Kaggle:
+# https://www.kaggle.com/datasets/aliaslam25/stack-overflow-developer-survey-2025
+survey_results_public.csv
+data/raw/survey_results_public.csv
+*.zip
+*.tar.gz
+
+# OS-specific files
+.DS_Store
+Thumbs.db
